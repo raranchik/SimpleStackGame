@@ -26,6 +26,9 @@
 # Visual Studio cache directory
 .vs/
 
+# JetBrains
+.idea/
+
 # Gradle cache directory
 .gradle/
 
@@ -70,3 +73,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Assets that are used and cannot be made publicly available
+/[Aa]ssets/[Ii]mportedAssets/*
+/[Aa]ssets/[Ii]mportedAssets.meta
