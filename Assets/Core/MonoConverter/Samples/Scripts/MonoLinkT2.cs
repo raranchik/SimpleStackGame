@@ -1,7 +1,6 @@
-﻿using Core.MonoConverter;
-using Leopotam.EcsLite;
+﻿using Leopotam.EcsLite;
 
-namespace MonoConverter.Samples
+namespace Core.MonoConverter
 {
     public class MonoLinkT2 : MonoLink<T2>
     {

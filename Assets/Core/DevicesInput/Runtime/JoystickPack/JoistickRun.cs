@@ -27,7 +27,7 @@ namespace Core.DevicesInput.JoystickPack
             foreach (var joystickLinkEntity in joystickLinkFilter)
             {
                 ref var joystickLink = ref joystickLinkPool.Get(joystickLinkEntity);
-                var joystick = joystickLink.m_Joystick;
+                var joystick = joystickLink.Value;
                 var direction2 = joystick.Direction;
                 if (!(direction2.sqrMagnitude >= InputThresholdSqr))
                 {
@@ -42,11 +42,11 @@ namespace Core.DevicesInput.JoystickPack
 
                 var moveRequestEntity = world.NewEntity();
                 ref var moveRequest = ref moveInDirPool.Add(moveRequestEntity);
-                moveRequest.Direction = direction3;
+                moveRequest.Value = direction3;
 
                 var rotateRequestEntity = world.NewEntity();
                 ref var rotateRequest = ref rotateInDirPool.Add(rotateRequestEntity);
-                rotateRequest.Direction = direction3;
+                rotateRequest.Value = direction3;
             }
         }
     }

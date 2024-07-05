@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core.DevicesInput.JoystickPack;
 using Core.Follower;
@@ -6,16 +7,22 @@ using Core.MonoConverter;
 using Core.Movement.Move;
 using Core.Movement.Rotate;
 using Core.Player;
+using Core.TimeListener;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
-using TimeListener;
 using UnityEngine;
+
 #if UNITY_EDITOR
 using Leopotam.EcsLite.UnityEditor;
+using Unity.IL2CPP.CompilerServices;
 #endif
 
 namespace Core
 {
+#if ENABLE_IL2CPP
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+#endif
     public class EcsRunner : MonoBehaviour
     {
         [SerializeField] private MonoLinker m_JoystickLinker;
@@ -26,9 +33,12 @@ namespace Core
         private IEcsSystems m_UpdateSystems;
         private IEcsSystems m_LateUpdateSystems;
         private IEcsSystems m_InitSystems;
+        private IEcsSystems m_FixedUpdateSystems;
+        private TimeService m_TimeService;
 
         private void Awake()
         {
+            m_TimeService = new TimeService();
             m_World = new EcsWorld();
 
             m_InitSystems = CreateInitSystems();
@@ -37,6 +47,9 @@ namespace Core
             m_UpdateSystems = CreateUpdateSystems();
             m_UpdateSystems.Init();
 
+            m_FixedUpdateSystems = CreateFixedUpdateSystems();
+            m_FixedUpdateSystems.Init();
+
             m_LateUpdateSystems = CreateLateUpdateSystems();
             m_LateUpdateSystems.Init();
         }
@@ -44,6 +57,11 @@ namespace Core
         private void Update()
         {
             m_UpdateSystems?.Run();
+        }
+
+        private void FixedUpdate()
+        {
+            m_FixedUpdateSystems?.Run();
         }
 
         private void LateUpdate()
@@ -58,6 +76,9 @@ namespace Core
 
             m_UpdateSystems?.Destroy();
             m_UpdateSystems = null;
+
+            m_FixedUpdateSystems?.Destroy();
+            m_FixedUpdateSystems = null;
 
             m_LateUpdateSystems?.Destroy();
             m_LateUpdateSystems = null;
@@ -84,10 +105,19 @@ namespace Core
             return new EcsSystems(m_World)
                 .Add(new TimeRun())
                 .Add(new JoystickRun())
+                // .Add(new MoveInDirectionRun())
+                // .Add(new RotateInDirectionRun())
+                // .Add(new FollowerLeaderRun())
+                .Inject(CreateUpdateInjectParams());
+        }
+
+        private IEcsSystems CreateFixedUpdateSystems()
+        {
+            return new EcsSystems(m_World)
                 .Add(new MoveInDirectionRun())
                 .Add(new RotateInDirectionRun())
                 .Add(new FollowerLeaderRun())
-                .Inject(CreateUpdateInjectParams());
+                .Inject(CreateFixedUpdateInjectParams());
         }
 
         private IEcsSystems CreateLateUpdateSystems()
@@ -101,7 +131,16 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    new TimeService(),
+                    m_TimeService,
+                }
+                .ToArray();
+        }
+
+        private object[] CreateFixedUpdateInjectParams()
+        {
+            return new HashSet<object>
+                {
+                    m_TimeService,
                 }
                 .ToArray();
         }

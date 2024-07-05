@@ -1,8 +1,8 @@
 ﻿using Core.DevicesInput;
-using Core.MonoConverter.Links;
+using Core.MonoConverter;
+using Core.TimeListener;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
-using TimeListener;
 using UnityEngine;
 
 namespace Core.Movement.Rotate
@@ -12,9 +12,9 @@ namespace Core.Movement.Rotate
         private readonly EcsWorldInject m_WorldInject;
         private readonly EcsPoolInject<RotateInDirectionRequest> m_RotateInDirRequestPoolInject;
         private readonly EcsFilterInject<Inc<RotateInDirectionRequest>> m_RotateInDirRequestFilterInject;
-        private readonly EcsFilterInject<Inc<TransformLink, RotateLink>> m_RotateLinkFilterInject;
+        private readonly EcsFilterInject<Inc<TransformLink, RotateMaxSpeedLink>> m_RotateLinkFilterInject;
         private readonly EcsPoolInject<TransformLink> m_TransformLinkPoolInject;
-        private readonly EcsPoolInject<RotateLink> m_RotateLinkPoolInject;
+        private readonly EcsPoolInject<RotateMaxSpeedLink> m_RotateLinkPoolInject;
         private readonly EcsCustomInject<TimeService> m_TimeServiceInject;
 
         public void Run(IEcsSystems systems)
@@ -39,15 +39,15 @@ namespace Core.Movement.Rotate
             foreach (var rotateLinkEntity in rotateLinkFilter)
             {
                 ref var transformLink = ref transformLinkPool.Get(rotateLinkEntity);
-                var transform = transformLink.Transform;
+                var transform = transformLink.Value;
                 ref var rotateLink = ref rotateLinkPool.Get(rotateLinkEntity);
                 foreach (var rotateInDirRequestEntity in rotateInDirRequestFilter)
                 {
                     ref var rotateInDirRequest = ref rotateInDirRequestPool.Get(rotateInDirRequestEntity);
-                    ref var direction = ref rotateInDirRequest.Direction;
+                    ref var direction = ref rotateInDirRequest.Value;
                     var toRotation = Quaternion.LookRotation(direction, Vector3.up);
                     var rotation = Quaternion.RotateTowards(transform.rotation, toRotation,
-                        rotateLink.m_Speed * timeService.DeltaTime);
+                        rotateLink.Value * timeService.DeltaTime);
                     transform.rotation = rotation;
 
                     world.DelEntity(rotateInDirRequestEntity);

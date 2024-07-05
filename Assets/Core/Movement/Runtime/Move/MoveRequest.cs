@@ -1,6 +1,5 @@
 ﻿using System;
 using Leopotam.EcsLite;
-
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif
@@ -14,6 +13,6 @@ namespace Core.Movement.Move
     [Serializable]
     public struct MoveRequest
     {
-        public EcsPackedEntity PackedEntity;
+        public EcsPackedEntity Value;
     }
 }

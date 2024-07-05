@@ -14,6 +14,6 @@ namespace Core.Follower
     [Serializable]
     public struct FollowerOffsetLink
     {
-        public Vector3 Offset;
+        public Vector3 Value;
     }
 }

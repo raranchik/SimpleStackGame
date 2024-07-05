@@ -1,10 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Leopotam.EcsLite;
+#if ENABLE_IL2CPP
+    using Unity.IL2CPP.CompilerServices;
+#endif
 
 namespace Core.MonoConverter
 {
+#if ENABLE_IL2CPP
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+#endif
     public class MonoLinker : MonoLinkBase
     {
         private bool m_IsInitialized;
@@ -18,25 +24,6 @@ namespace Core.MonoConverter
             {
                 link.LinkTo(packedEntityWithWorld);
             }
-        }
-
-        public MonoLink<T> GetLink<T>() where T : struct
-        {
-            Init();
-            var type = typeof(T);
-            return m_Links[type.Name] as MonoLink<T>;
-        }
-
-        public bool IsLinkExist<T>() where T : struct
-        {
-            var type = typeof(T);
-            return IsLinkExist(type);
-        }
-
-        public bool IsLinkExist(Type type)
-        {
-            Init();
-            return m_Links.ContainsKey(type.Name);
         }
 
         private void Init()

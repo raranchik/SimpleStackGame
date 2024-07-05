@@ -1,4 +1,4 @@
-﻿using Core.MonoConverter.Links;
+﻿using Core.MonoConverter;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 
@@ -29,8 +29,8 @@ namespace Core.Follower
                 ref var offsetLink = ref offsetLinkPool.Get(followerEntity);
                 ref var transformLink = ref transformLinkPool.Get(followerEntity);
 
-                var position = targetLink.TargetTransform.position + offsetLink.Offset;
-                transformLink.Transform.position = position;
+                var position = targetLink.Value.position + offsetLink.Value;
+                transformLink.Value.position = position;
 
                 followSelfRequestPool.Del(followerEntity);
             }

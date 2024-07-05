@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif
@@ -13,6 +12,6 @@ namespace Core.DevicesInput.JoystickPack
     [Serializable]
     public struct JoystickLink
     {
-        [SerializeField] public Joystick m_Joystick;
+        public Joystick Value;
     }
 }

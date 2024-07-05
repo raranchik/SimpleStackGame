@@ -13,6 +13,6 @@ namespace Core.DevicesInput
     [Serializable]
     public struct RotateInDirectionRequest
     {
-        public Vector3 Direction;
+        public Vector3 Value;
     }
 }

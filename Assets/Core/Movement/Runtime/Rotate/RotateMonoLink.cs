@@ -2,7 +2,7 @@
 
 namespace Core.Movement.Rotate
 {
-    public class RotateMonoLink : MonoLink<RotateLink>
+    public class RotateMonoLink : MonoLink<RotateMaxSpeedLink>
     {
     }
 }

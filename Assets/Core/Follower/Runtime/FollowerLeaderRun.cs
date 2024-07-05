@@ -1,4 +1,4 @@
-﻿using Core.MonoConverter.Links;
+﻿using Core.MonoConverter;
 using Core.Movement.Move;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
@@ -39,7 +39,7 @@ namespace Core.Follower
             foreach (var moveRequestEntity in moveRequestFilter)
             {
                 ref var moveRequest = ref moveRequestPool.Get(moveRequestEntity);
-                ref var packedEntity = ref moveRequest.PackedEntity;
+                ref var packedEntity = ref moveRequest.Value;
                 if (!packedEntity.Unpack(world, out var moveEntity))
                 {
                     continue;
@@ -49,7 +49,7 @@ namespace Core.Follower
                 foreach (var followerEntity in followerFilter)
                 {
                     ref var targetLink = ref targetPool.Get(followerEntity);
-                    if (targetLink.TargetTransform != transformLink.Transform)
+                    if (targetLink.Value != transformLink.Value)
                     {
                         continue;
                     }

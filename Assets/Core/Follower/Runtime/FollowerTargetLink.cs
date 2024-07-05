@@ -14,6 +14,6 @@ namespace Core.Follower
     [Serializable]
     public struct FollowerTargetLink
     {
-        public Transform TargetTransform;
+        public Transform Value;
     }
 }
