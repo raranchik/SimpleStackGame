@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Leopotam.EcsLite;
 
-namespace MonoConverter
+namespace Core.MonoConverter
 {
     public class MonoLinker : MonoLinkBase
     {

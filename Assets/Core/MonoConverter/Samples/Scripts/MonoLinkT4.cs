@@ -1,4 +1,5 @@
-﻿using Leopotam.EcsLite;
+﻿using Core.MonoConverter;
+using Leopotam.EcsLite;
 
 namespace MonoConverter.Samples
 {

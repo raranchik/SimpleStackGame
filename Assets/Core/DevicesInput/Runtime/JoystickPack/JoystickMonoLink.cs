@@ -1,6 +1,6 @@
-﻿using MonoConverter;
+﻿using Core.MonoConverter;
 
-namespace Core.JoystickInput
+namespace Core.DevicesInput.JoystickPack
 {
     public class JoystickMonoLink : MonoLink<JoystickLink>
     {

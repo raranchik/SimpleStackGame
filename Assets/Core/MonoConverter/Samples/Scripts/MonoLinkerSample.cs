@@ -1,5 +1,6 @@
-﻿using Leopotam.EcsLite;
-using Logger;
+﻿using Core.Logger;
+using Core.MonoConverter;
+using Leopotam.EcsLite;
 using UnityEngine;
 
 namespace MonoConverter.Samples

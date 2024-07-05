@@ -1,8 +1,8 @@
-﻿using Leopotam.EcsLite;
+﻿using Core.MonoConverter;
+using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
-using MonoConverter;
 
-namespace Core.JoystickInput
+namespace Core.DevicesInput.JoystickPack
 {
     public class JoystickInit : IEcsInitSystem
     {

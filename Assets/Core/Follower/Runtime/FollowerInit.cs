@@ -2,16 +2,16 @@
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 
-namespace Core.Player
+namespace Core.Follower
 {
-    public class PlayerInit : IEcsInitSystem
+    public class FollowerInit : IEcsInitSystem
     {
-        private readonly MonoLinkBase m_PlayerLinker;
+        private readonly MonoLinkBase m_Linker;
         private readonly EcsWorldInject m_WorldInject = default;
 
-        public PlayerInit(MonoLinkBase playerLinker)
+        public FollowerInit(MonoLinkBase linker)
         {
-            m_PlayerLinker = playerLinker;
+            m_Linker = linker;
         }
 
         public void Init(IEcsSystems systems)
@@ -19,7 +19,7 @@ namespace Core.Player
             var world = m_WorldInject.Value;
             var entity = world.NewEntity();
             var packed = world.PackEntityWithWorld(entity);
-            m_PlayerLinker.LinkTo(packed);
+            m_Linker.LinkTo(packed);
         }
     }
 }

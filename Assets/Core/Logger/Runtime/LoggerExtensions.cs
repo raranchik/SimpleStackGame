@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Logger
+namespace Core.Logger
 {
     public static class LoggerExtensions
     {

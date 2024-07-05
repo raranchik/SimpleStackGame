@@ -4,15 +4,15 @@ using UnityEngine;
     using Unity.IL2CPP.CompilerServices;
 #endif
 
-namespace Core.MonoConverter.Links
+namespace Core.DevicesInput
 {
 #if ENABLE_IL2CPP
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 #endif
     [Serializable]
-    public struct TransformLink
+    public struct RotateInDirectionRequest
     {
-        public Transform Transform;
+        public Vector3 Direction;
     }
 }

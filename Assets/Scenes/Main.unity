@@ -318,10 +318,10 @@ GameObject:
   m_Component:
   - component: {fileID: 963194228}
   - component: {fileID: 963194230}
-  - component: {fileID: 963194227}
-  - component: {fileID: 963194226}
   - component: {fileID: 963194229}
   - component: {fileID: 963194231}
+  - component: {fileID: 963194227}
+  - component: {fileID: 963194226}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -807,6 +807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_JoystickLinker: {fileID: 8170153791700864326}
   m_PlayerLinker: {fileID: 1342231485}
+  m_CameraLinker: {fileID: 963194230}
 --- !u!4 &1715752539
 Transform:
   m_ObjectHideFlags: 0
@@ -1101,10 +1102,10 @@ RectTransform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1715752539}
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 1357470477}
   - {fileID: 1624722263}
-  - {fileID: 1715752539}
   - {fileID: 952794661}
   - {fileID: 1342231483}

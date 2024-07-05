@@ -1,7 +1,7 @@
 ﻿using Leopotam.EcsLite;
 using UnityEngine;
 
-namespace MonoConverter
+namespace Core.MonoConverter
 {
     public abstract class MonoLink<T> : MonoLinkBase where T : struct
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Logger
+namespace Core.Logger
 {
     public class LoggerDecorator : ILogger
     {

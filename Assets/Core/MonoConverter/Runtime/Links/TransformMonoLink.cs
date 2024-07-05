@@ -1,4 +1,4 @@
-﻿namespace MonoConverter.Links
+﻿namespace Core.MonoConverter.Links
 {
     public class TransformMonoLink : MonoLink<TransformLink>
     {

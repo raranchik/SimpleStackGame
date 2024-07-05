@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Logger
+namespace Core.Logger
 {
     public class LoggerWithPrefix : LoggerDecorator
     {
