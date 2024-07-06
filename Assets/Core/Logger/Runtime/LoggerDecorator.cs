@@ -26,7 +26,7 @@ namespace Core.Logger
             set => m_Logger.filterLogType = value;
         }
 
-        internal LoggerDecorator(ILogger logger)
+        public LoggerDecorator(ILogger logger)
         {
             m_Logger = logger;
         }

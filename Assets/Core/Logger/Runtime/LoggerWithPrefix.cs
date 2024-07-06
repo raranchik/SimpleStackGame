@@ -15,5 +15,10 @@ namespace Core.Logger
         {
             base.Log(message.AddPrefix(m_Prefix));
         }
+
+        public override void Log(LogType logType, object message)
+        {
+            base.Log(logType, message.AddPrefix(m_Prefix));
+        }
     }
 }

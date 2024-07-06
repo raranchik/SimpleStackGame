@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Core.DevicesInput.JoystickPack;
 using Core.Follower;
@@ -7,14 +6,17 @@ using Core.MonoConverter;
 using Core.Movement.Move;
 using Core.Movement.Rotate;
 using Core.Player;
-using Core.TimeListener;
+using Core.TimeManagement.Time;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
 
+#if ENABLE_IL2CPP
+    using Unity.IL2CPP.CompilerServices;
+#endif
+
 #if UNITY_EDITOR
 using Leopotam.EcsLite.UnityEditor;
-using Unity.IL2CPP.CompilerServices;
 #endif
 
 namespace Core
@@ -34,11 +36,11 @@ namespace Core
         private IEcsSystems m_LateUpdateSystems;
         private IEcsSystems m_InitSystems;
         private IEcsSystems m_FixedUpdateSystems;
-        private TimeService m_TimeService;
+        private TimeListener m_TimeListener;
 
         private void Awake()
         {
-            m_TimeService = new TimeService();
+            m_TimeListener = new TimeListener();
             m_World = new EcsWorld();
 
             m_InitSystems = CreateInitSystems();
@@ -103,11 +105,8 @@ namespace Core
         private IEcsSystems CreateUpdateSystems()
         {
             return new EcsSystems(m_World)
-                .Add(new TimeRun())
+                .Add(new TimeListenerRun())
                 .Add(new JoystickRun())
-                // .Add(new MoveInDirectionRun())
-                // .Add(new RotateInDirectionRun())
-                // .Add(new FollowerLeaderRun())
                 .Inject(CreateUpdateInjectParams());
         }
 
@@ -131,7 +130,7 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    m_TimeService,
+                    m_TimeListener,
                 }
                 .ToArray();
         }
@@ -140,7 +139,7 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    m_TimeService,
+                    m_TimeListener,
                 }
                 .ToArray();
         }

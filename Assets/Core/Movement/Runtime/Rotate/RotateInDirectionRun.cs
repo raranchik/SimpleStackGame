@@ -1,6 +1,6 @@
 ﻿using Core.DevicesInput;
 using Core.MonoConverter;
-using Core.TimeListener;
+using Core.TimeManagement.Time;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace Core.Movement.Rotate
         private readonly EcsFilterInject<Inc<TransformLink, RotateMaxSpeedLink>> m_RotateLinkFilterInject;
         private readonly EcsPoolInject<TransformLink> m_TransformLinkPoolInject;
         private readonly EcsPoolInject<RotateMaxSpeedLink> m_RotateLinkPoolInject;
-        private readonly EcsCustomInject<TimeService> m_TimeServiceInject;
+        private readonly EcsCustomInject<TimeListener> m_TimeServiceInject;
 
         public void Run(IEcsSystems systems)
         {

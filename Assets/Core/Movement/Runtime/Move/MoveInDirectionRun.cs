@@ -1,6 +1,6 @@
 ﻿using Core.DevicesInput;
 using Core.MonoConverter;
-using Core.TimeListener;
+using Core.TimeManagement.Time;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace Core.Movement.Move
         private readonly EcsFilterInject<Inc<TransformLink, MoveMaxSpeedLink>> m_MoveLinkFilterInject;
         private readonly EcsPoolInject<TransformLink> m_TransformLinkPoolInject;
         private readonly EcsPoolInject<MoveMaxSpeedLink> m_MoveLinkPoolInject;
-        private readonly EcsCustomInject<TimeService> m_TimeServiceInject;
+        private readonly EcsCustomInject<TimeListener> m_TimeServiceInject;
         private readonly EcsPoolInject<MoveRequest> m_MoveRequestPoolInject;
         private readonly EcsFilterInject<Inc<MoveRequest>> m_MoveRequestFilterInject;
 
