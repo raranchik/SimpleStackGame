@@ -1,12 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Core.DevicesInput.JoystickPack;
-using Core.Follower;
+using Core.DevicesInput.JoystickPack.Systems;
+using Core.Follower.Systems;
+using Core.InteractiveStack.Generator.Systems;
 using Core.MonoConverter;
-using Core.Movement.Move;
-using Core.Movement.Rotate;
+using Core.MonoConverter.Factory;
+using Core.MonoConverter.Pool;
+using Core.Movement.Move.Systems;
+using Core.Movement.Rotate.Systems;
 using Core.Player;
 using Core.TimeManagement.Time;
+using Core.TimeManagement.Timer.Services;
+using Core.TimeManagement.Timer.Systems;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
@@ -30,6 +35,8 @@ namespace Core
         [SerializeField] private MonoLinker m_JoystickLinker;
         [SerializeField] private MonoLinker m_PlayerLinker;
         [SerializeField] private MonoLinker m_CameraLinker;
+        [SerializeField] private MonoLinker[] m_Generators;
+        [SerializeField] private MonoLinker m_ObjectPrefab;
 
         private EcsWorld m_World;
         private IEcsSystems m_UpdateSystems;
@@ -37,11 +44,13 @@ namespace Core
         private IEcsSystems m_InitSystems;
         private IEcsSystems m_FixedUpdateSystems;
         private TimeListener m_TimeListener;
+        private TimerService m_TimerService;
 
         private void Awake()
         {
             m_TimeListener = new TimeListener();
             m_World = new EcsWorld();
+            m_TimerService = new TimerService(m_World);
 
             m_InitSystems = CreateInitSystems();
             m_InitSystems.Init();
@@ -95,6 +104,7 @@ namespace Core
                 .Add(new JoystickInit(m_JoystickLinker))
                 .Add(new PlayerInit(m_PlayerLinker))
                 .Add(new FollowerInit(m_CameraLinker))
+                .Add(new GeneratorInit(m_Generators, m_TimerService))
 #if UNITY_EDITOR
                 .Add(new EcsSystemsDebugSystem())
                 .Add(new EcsWorldDebugSystem())
@@ -106,6 +116,10 @@ namespace Core
         {
             return new EcsSystems(m_World)
                 .Add(new TimeListenerRun())
+                .Add(new IntervalTimerRun(Debug.unityLogger))
+                .Add(new GenerateSelfPingRequestHandlerRun(Debug.unityLogger))
+                .Add(new GenerateSelfRequestHandlerRun(Debug.unityLogger,
+                    new EntityOutPool(m_World, new EntityOutFactory(m_World, m_ObjectPrefab), 5)))
                 .Add(new JoystickRun())
                 .Inject(CreateUpdateInjectParams());
         }

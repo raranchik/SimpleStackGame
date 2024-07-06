@@ -1,5 +1,6 @@
 ﻿using Leopotam.EcsLite;
 using UnityEngine;
+
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif

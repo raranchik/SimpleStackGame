@@ -13,11 +13,11 @@ namespace Core.TimeManagement.Time
 #endif
     public class TimeListenerRun : IEcsRunSystem
     {
-        private readonly EcsCustomInject<TimeListener> m_TimeServiceInject = default;
+        private readonly EcsCustomInject<TimeListener> m_TimeService = default;
 
         public void Run(IEcsSystems systems)
         {
-            var timeService = m_TimeServiceInject.Value;
+            var timeService = m_TimeService.Value;
             timeService.Time = UnityEngine.Time.time;
             timeService.DeltaTime = UnityEngine.Time.deltaTime;
             timeService.UnscaledTime = UnityEngine.Time.unscaledTime;

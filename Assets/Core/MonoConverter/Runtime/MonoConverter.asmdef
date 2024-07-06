@@ -2,7 +2,8 @@
     "name": "MonoConverter",
     "rootNamespace": "",
     "references": [
-        "GUID:e59bf9fc7d5a44b18a819a92edd46163"
+        "GUID:e59bf9fc7d5a44b18a819a92edd46163",
+        "GUID:95bfbf0895de4b1da0c8f156f5267541"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

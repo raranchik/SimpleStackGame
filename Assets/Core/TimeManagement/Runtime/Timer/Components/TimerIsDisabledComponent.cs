@@ -1,5 +1,4 @@
 ﻿using System;
-
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif

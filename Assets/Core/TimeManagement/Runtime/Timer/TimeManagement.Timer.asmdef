@@ -1,3 +1,19 @@
-﻿{
-  "name": "TimeManagement.Timer"
+{
+    "name": "TimeManagement.Timer",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e59bf9fc7d5a44b18a819a92edd46163",
+        "GUID:f5f01a091e0d746659b4380253d52f4e",
+        "GUID:d802d1d3ddd74602ae9779a616e70843",
+        "GUID:970057e77ab26fe4e94d401899df92c4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
