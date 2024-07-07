@@ -1,6 +1,5 @@
 ﻿using System;
 using Leopotam.EcsLite;
-
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif
@@ -14,7 +13,7 @@ namespace Core.InteractiveStack.Stack.Requests
     [Serializable]
     public struct StackPopRequest
     {
-        public EcsPackedEntity Item;
+        public EcsPackedEntity Object;
         public EcsPackedEntity Destination;
     }
 }

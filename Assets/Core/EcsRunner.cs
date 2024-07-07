@@ -2,10 +2,7 @@
 using System.Linq;
 using Core.DevicesInput.JoystickPack.Systems;
 using Core.Follower.Systems;
-using Core.InteractiveStack.Generator.Systems;
 using Core.MonoConverter;
-using Core.MonoConverter.Factory;
-using Core.MonoConverter.Pool;
 using Core.Movement.Move.Systems;
 using Core.Movement.Rotate.Systems;
 using Core.Player;
@@ -104,7 +101,7 @@ namespace Core
                 .Add(new JoystickInit(m_JoystickLinker))
                 .Add(new PlayerInit(m_PlayerLinker))
                 .Add(new FollowerInit(m_CameraLinker))
-                .Add(new GeneratorInit(m_Generators, m_TimerService))
+                // .Add(new GeneratorInit(m_Generators, m_TimerService))
 #if UNITY_EDITOR
                 .Add(new EcsSystemsDebugSystem())
                 .Add(new EcsWorldDebugSystem())
@@ -117,9 +114,9 @@ namespace Core
             return new EcsSystems(m_World)
                 .Add(new TimeListenerRun())
                 .Add(new IntervalTimerRun(Debug.unityLogger))
-                .Add(new GenerateSelfPingRequestHandlerRun(Debug.unityLogger))
-                .Add(new GenerateSelfRequestHandlerRun(Debug.unityLogger,
-                    new EntityOutPool(m_World, new EntityOutFactory(m_World, m_ObjectPrefab), 5)))
+                // .Add(new GeneratorIntervalTimerCompleteSelfRequestHandlerRun(Debug.unityLogger))
+                // .Add(new GenerateSelfRequestHandlerRun(Debug.unityLogger,
+                //     new EntityOutPool(new EntityOutFactory(m_World, m_ObjectPrefab), 5)))
                 .Add(new JoystickRun())
                 .Inject(CreateUpdateInjectParams());
         }

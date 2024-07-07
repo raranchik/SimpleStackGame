@@ -40,7 +40,7 @@ namespace Core.TimeManagement.Timer.Builders
 
         public TimerBuilder AsDisabled()
         {
-            var pool = m_World.GetPool<TimerIsDisabledComponent>();
+            var pool = m_World.GetPool<IsDisabledComponent>();
             pool.Add(m_NewEntity);
             return this;
         }

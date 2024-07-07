@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Core.Base.Runtime;
-using Core.MonoConverter.Links;
 using Leopotam.EcsLite;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
@@ -14,15 +13,13 @@ namespace Core.MonoConverter.Pool
 #endif
     public class EntityOutPool : IOutPool<EcsPackedEntityWithWorld>
     {
-        private readonly EcsWorld m_World;
         private readonly IOutFactory<EcsPackedEntityWithWorld> m_Factory;
         private readonly int m_ExpandSize;
         private readonly Stack<EcsPackedEntityWithWorld> m_Stack;
 
-        public EntityOutPool(EcsWorld world, IOutFactory<EcsPackedEntityWithWorld> factory, int initSize,
+        public EntityOutPool(IOutFactory<EcsPackedEntityWithWorld> factory, int initSize,
             int expandSize = 5)
         {
-            m_World = world;
             m_Factory = factory;
             m_ExpandSize = expandSize;
             m_Stack = new Stack<EcsPackedEntityWithWorld>(initSize);
@@ -49,17 +46,9 @@ namespace Core.MonoConverter.Pool
 
         private void Expand(int size)
         {
-            var pool = m_World.GetPool<GameObjectLink>();
             for (var i = 0; i < size; i++)
             {
                 m_Factory.Create(out var result);
-                result.Unpack(out var world, out var entity);
-                if (pool.Has(entity))
-                {
-                    ref var gameObject = ref pool.Get(entity);
-                    gameObject.Value.SetActive(false);
-                }
-
                 m_Stack.Push(result);
             }
         }

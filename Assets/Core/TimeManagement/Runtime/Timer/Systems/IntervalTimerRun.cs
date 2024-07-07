@@ -21,11 +21,11 @@ namespace Core.TimeManagement.Timer.Systems
 
         private readonly EcsFilterInject<
             Inc<ElapsedTimeComponent, DurationComponent, IsIntervalTimerComponent>,
-            Exc<TimerIsDisabledComponent>
-        > m_CounterFilter;
+            Exc<IsDisabledComponent>
+        > m_TimerFilter;
 
         private readonly EcsCustomInject<TimeListener> m_TimeListener;
-        private readonly EcsFilterInject<Inc<SelfPingRequest>> m_PingRequestFilter;
+        private readonly EcsFilterInject<Inc<CompleteSelfRequest>> m_CompleteTimerFilter;
 
         public IntervalTimerRun(ILogger logger)
         {
@@ -34,36 +34,37 @@ namespace Core.TimeManagement.Timer.Systems
 
         public void Run(IEcsSystems systems)
         {
-            if (m_PingRequestFilter.Value.GetEntitiesCount() > 0)
+            if (m_CompleteTimerFilter.Value.GetEntitiesCount() > 0)
             {
                 m_Logger.Log(LogType.Error,
                     $"Requests that have run 1 cycle are in system:" +
-                    $" count {m_PingRequestFilter.Value.GetEntitiesCount().ToString()}." +
+                    $" count {m_CompleteTimerFilter.Value.GetEntitiesCount().ToString()}." +
                     $" I deleted them for you");
-                foreach (var pingEntity in m_PingRequestFilter.Value)
+
+                foreach (var completeTimer in m_CompleteTimerFilter.Value)
                 {
-                    m_PingRequestFilter.Pools.Inc1.Del(pingEntity);
+                    m_CompleteTimerFilter.Pools.Inc1.Del(completeTimer);
                 }
             }
 
-            if (m_CounterFilter.Value.GetEntitiesCount() <= 0)
+            if (m_TimerFilter.Value.GetEntitiesCount() <= 0)
             {
                 return;
             }
 
-            foreach (var counterEntity in m_CounterFilter.Value)
+            foreach (var timer in m_TimerFilter.Value)
             {
-                ref var counter = ref m_CounterFilter.Pools.Inc1.Get(counterEntity);
-                counter.Value += m_TimeListener.Value.DeltaTime;
+                ref var elapsed = ref m_TimerFilter.Pools.Inc1.Get(timer);
+                elapsed.Value += m_TimeListener.Value.DeltaTime;
 
-                ref var pingInterval = ref m_CounterFilter.Pools.Inc2.Get(counterEntity);
-                if (counter.Value < pingInterval.Value)
+                ref var duration = ref m_TimerFilter.Pools.Inc2.Get(timer);
+                if (elapsed.Value < duration.Value)
                 {
                     continue;
                 }
 
-                counter.Value = 0f;
-                m_PingRequestFilter.Pools.Inc1.Add(counterEntity);
+                elapsed.Value = 0f;
+                m_CompleteTimerFilter.Pools.Inc1.Add(timer);
             }
         }
     }
