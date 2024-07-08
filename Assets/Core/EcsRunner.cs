@@ -5,18 +5,16 @@ using Core.Follower.Systems;
 using Core.MonoConverter;
 using Core.Movement.Move.Systems;
 using Core.Movement.Rotate.Systems;
-using Core.Player;
-using Core.TimeManagement.Time;
-using Core.TimeManagement.Timer.Services;
-using Core.TimeManagement.Timer.Systems;
+using Core.Player.Systems;
+using Core.Time;
+using Core.Timer.Services;
+using Core.Timer.Systems;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
-
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif
-
 #if UNITY_EDITOR
 using Leopotam.EcsLite.UnityEditor;
 #endif
@@ -36,18 +34,24 @@ namespace Core
         [SerializeField] private MonoLinker m_ObjectPrefab;
 
         private EcsWorld m_World;
+
         private IEcsSystems m_UpdateSystems;
         private IEcsSystems m_LateUpdateSystems;
         private IEcsSystems m_InitSystems;
         private IEcsSystems m_FixedUpdateSystems;
-        private TimeListener m_TimeListener;
+#if UNITY_EDITOR
+        private IEcsSystems m_LeoEcsDebugSystems;
+#endif
+
+        private TimeService m_TimeService;
         private TimerService m_TimerService;
 
         private void Awake()
         {
-            m_TimeListener = new TimeListener();
-            m_World = new EcsWorld();
+            m_TimeService = new TimeService();
             m_TimerService = new TimerService(m_World);
+
+            m_World = new EcsWorld();
 
             m_InitSystems = CreateInitSystems();
             m_InitSystems.Init();
@@ -60,11 +64,18 @@ namespace Core
 
             m_LateUpdateSystems = CreateLateUpdateSystems();
             m_LateUpdateSystems.Init();
+#if UNITY_EDITOR
+            m_LeoEcsDebugSystems = CreateLeoEcsDebugSystems();
+            m_LeoEcsDebugSystems.Init();
+#endif
         }
 
         private void Update()
         {
             m_UpdateSystems?.Run();
+#if UNITY_EDITOR
+            m_LeoEcsDebugSystems?.Run();
+#endif
         }
 
         private void FixedUpdate()
@@ -93,26 +104,26 @@ namespace Core
 
             m_World?.Destroy();
             m_World = null;
+#if UNITY_EDITOR
+            m_LeoEcsDebugSystems?.Destroy();
+            m_LeoEcsDebugSystems = null;
+#endif
         }
 
         private IEcsSystems CreateInitSystems()
         {
             return new EcsSystems(m_World)
                 .Add(new JoystickInit(m_JoystickLinker))
-                .Add(new PlayerInit(m_PlayerLinker))
+                .Add(new PlayerAvatarInit(m_PlayerLinker))
                 .Add(new FollowerInit(m_CameraLinker))
                 // .Add(new GeneratorInit(m_Generators, m_TimerService))
-#if UNITY_EDITOR
-                .Add(new EcsSystemsDebugSystem())
-                .Add(new EcsWorldDebugSystem())
-#endif
                 .Inject();
         }
 
         private IEcsSystems CreateUpdateSystems()
         {
             return new EcsSystems(m_World)
-                .Add(new TimeListenerRun())
+                .Add(new TimeServiceRun())
                 .Add(new IntervalTimerRun(Debug.unityLogger))
                 // .Add(new GeneratorIntervalTimerCompleteSelfRequestHandlerRun(Debug.unityLogger))
                 // .Add(new GenerateSelfRequestHandlerRun(Debug.unityLogger,
@@ -124,8 +135,11 @@ namespace Core
         private IEcsSystems CreateFixedUpdateSystems()
         {
             return new EcsSystems(m_World)
-                .Add(new MoveInDirectionRun())
-                .Add(new RotateInDirectionRun())
+                .Add(new EndMoveInDirectionPlayerAvatarRun())
+                .Add(new StartMoveInDirectionPlayerAvatarRun())
+                .Add(new MoveInDirectionPlayerAvatarRun())
+                .Add(new StartRotateInDirectionPlayerAvatarRun())
+                .Add(new RotateInDirectionPlayerAvatarRun())
                 .Add(new FollowerLeaderRun())
                 .Inject(CreateFixedUpdateInjectParams());
         }
@@ -141,7 +155,7 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    m_TimeListener,
+                    m_TimeService,
                 }
                 .ToArray();
         }
@@ -150,9 +164,18 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    m_TimeListener,
+                    m_TimeService,
                 }
                 .ToArray();
         }
+#if UNITY_EDITOR
+        private IEcsSystems CreateLeoEcsDebugSystems()
+        {
+            return new EcsSystems(m_World)
+                .Add(new EcsSystemsDebugSystem())
+                .Add(new EcsWorldDebugSystem())
+                .Inject();
+        }
+#endif
     }
 }

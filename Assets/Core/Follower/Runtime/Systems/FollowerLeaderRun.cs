@@ -1,5 +1,5 @@
 ﻿using Core.Follower.Links;
-using Core.Follower.SelfRequests;
+using Core.Follower.Requests;
 using Core.MonoConverter.Links;
 using Core.Movement.Move.Request;
 using Leopotam.EcsLite;
@@ -21,9 +21,9 @@ namespace Core.Follower.Systems
 
         private readonly EcsWorldInject m_World;
         private readonly EcsFilterInject<Inc<MoveRequest>> m_MoveRequestFilter;
-        private readonly EcsPoolInject<TransformLink> m_TransformLinkPool;
+        private readonly EcsPoolInject<TransformLink> m_TransformPool;
         private readonly EcsPoolInject<FollowerTargetLink> m_TargetPool;
-        private readonly EcsPoolInject<FollowerFollowSelfRequest> m_FollowerSelfRequestPool;
+        private readonly EcsPoolInject<FollowerFollowRequest> m_FollowRequestPool;
 
         public void Run(IEcsSystems systems)
         {
@@ -43,19 +43,23 @@ namespace Core.Follower.Systems
                 ref var packedEntity = ref moveRequest.Value;
                 if (!packedEntity.Unpack(m_World.Value, out var moveEntity))
                 {
+                    m_World.Value.DelEntity(moveRequestEntity);
                     continue;
                 }
 
-                ref var transformLink = ref m_TransformLinkPool.Value.Get(moveEntity);
+                ref var transform = ref m_TransformPool.Value.Get(moveEntity);
                 foreach (var followerEntity in m_FollowerFilter.Value)
                 {
-                    ref var targetLink = ref m_TargetPool.Value.Get(followerEntity);
-                    if (targetLink.Value != transformLink.Value)
+                    ref var target = ref m_TargetPool.Value.Get(followerEntity);
+                    if (target.Value != transform.Value)
                     {
                         continue;
                     }
 
-                    m_FollowerSelfRequestPool.Value.Add(followerEntity);
+                    var followRequestEntity = m_World.Value.NewEntity();
+                    ref var followRequest = ref m_FollowRequestPool.Value.Add(followRequestEntity);
+                    followRequest.Value = m_World.Value.PackEntity(followerEntity);
+                    m_World.Value.DelEntity(moveRequestEntity);
                 }
             }
         }

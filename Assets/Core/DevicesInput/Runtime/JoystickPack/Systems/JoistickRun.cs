@@ -18,45 +18,89 @@ namespace Core.DevicesInput.JoystickPack.Systems
         private const float InputThresholdSqr = 0.01f;
 
         private readonly EcsWorldInject m_World;
-        private readonly EcsFilterInject<Inc<JoystickLink>> m_JoystickLinkFilter;
-        private readonly EcsPoolInject<JoystickLink> m_JoystickLinkPool;
-        private readonly EcsPoolInject<MoveInDirectionRequest> m_MoveInDirectionPool;
-        private readonly EcsPoolInject<RotateInDirectionRequest> m_RotateInDirectionPool;
+        private readonly EcsFilterInject<Inc<JoystickLink>> m_JoystickFilter;
+
+        private readonly EcsPoolInject<IsStartMoveInDirectionRequest> m_IsStartMoveInDirPool;
+        private readonly EcsPoolInject<MoveInDirectionRequest> m_MoveInDirPool;
+        private readonly EcsPoolInject<IsEndMoveInDirectionRequest> m_IsEndMoveInDirPool;
+
+        private readonly EcsPoolInject<IsStartRotateInDirection> m_IsStartRotateInDirPool;
+        private readonly EcsPoolInject<RotateInDirectionRequest> m_RotateInDirPool;
+
+        private bool m_IsHandleInput;
 
         public void Run(IEcsSystems systems)
         {
-            var joystickLinkFilter = m_JoystickLinkFilter.Value;
-            if (joystickLinkFilter.GetEntitiesCount() <= 0)
+            if (m_JoystickFilter.Value.GetEntitiesCount() <= 0)
             {
                 return;
             }
 
-            var world = m_World.Value;
-            var joystickLinkPool = m_JoystickLinkPool.Value;
-            foreach (var joystickLinkEntity in joystickLinkFilter)
+            foreach (var joystickEntity in m_JoystickFilter.Value)
             {
-                ref var joystickLink = ref joystickLinkPool.Get(joystickLinkEntity);
-                var joystick = joystickLink.Value;
-                var direction2 = joystick.Direction;
-                if (!(direction2.sqrMagnitude >= InputThresholdSqr))
+                ref var joystick = ref m_JoystickFilter.Pools.Inc1.Get(joystickEntity);
+                var direction2 = joystick.Value.Direction;
+                if (direction2.sqrMagnitude < InputThresholdSqr)
                 {
+                    if (m_IsHandleInput)
+                    {
+                        m_IsHandleInput = false;
+                        CreateEndMoveInDirectionRequest();
+                    }
+
                     return;
                 }
-
-                var moveInDirPool = m_MoveInDirectionPool.Value;
-                var rotateInDirPool = m_RotateInDirectionPool.Value;
 
                 direction2.Normalize();
                 var direction3 = new Vector3(direction2.x, 0f, direction2.y);
 
-                var moveRequestEntity = world.NewEntity();
-                ref var moveRequest = ref moveInDirPool.Add(moveRequestEntity);
-                moveRequest.Direction = direction3;
-
-                var rotateRequestEntity = world.NewEntity();
-                ref var rotateRequest = ref rotateInDirPool.Add(rotateRequestEntity);
-                rotateRequest.Direction = direction3;
+                if (!m_IsHandleInput)
+                {
+                    m_IsHandleInput = true;
+                    CreateStartMoveInDirectionRequest(direction3);
+                    CreateStartRotateInDirectionRequest(direction3);
+                }
+                else
+                {
+                    m_IsHandleInput = true;
+                    CreateMoveInDirectionRequest(direction3);
+                    CreateRotateInDirectionRequest(direction3);
+                }
             }
+        }
+
+        private void CreateStartMoveInDirectionRequest(in Vector3 direction)
+        {
+            var entity = m_World.Value.NewEntity();
+            ref var request = ref m_IsStartMoveInDirPool.Value.Add(entity);
+            request.Value = direction;
+        }
+
+        private void CreateMoveInDirectionRequest(in Vector3 direction)
+        {
+            var entity = m_World.Value.NewEntity();
+            ref var request = ref m_MoveInDirPool.Value.Add(entity);
+            request.Value = direction;
+        }
+
+        private void CreateEndMoveInDirectionRequest()
+        {
+            var entity = m_World.Value.NewEntity();
+            m_IsEndMoveInDirPool.Value.Add(entity);
+        }
+
+        private void CreateStartRotateInDirectionRequest(in Vector3 direction)
+        {
+            var entity = m_World.Value.NewEntity();
+            ref var request = ref m_IsStartRotateInDirPool.Value.Add(entity);
+            request.Value = direction;
+        }
+
+        private void CreateRotateInDirectionRequest(in Vector3 direction)
+        {
+            var entity = m_World.Value.NewEntity();
+            ref var request = ref m_RotateInDirPool.Value.Add(entity);
+            request.Value = direction;
         }
     }
 }

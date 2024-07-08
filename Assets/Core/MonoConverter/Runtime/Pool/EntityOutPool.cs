@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Core.Base.Runtime;
+using Core.Base;
 using Leopotam.EcsLite;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;

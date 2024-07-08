@@ -14,6 +14,6 @@ namespace Core.DevicesInput.Requests
     [Serializable]
     public struct MoveInDirectionRequest
     {
-        public Vector3 Direction;
+        public Vector3 Value;
     }
 }

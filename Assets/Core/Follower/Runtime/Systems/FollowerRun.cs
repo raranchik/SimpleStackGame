@@ -1,5 +1,5 @@
 ﻿using Core.Follower.Links;
-using Core.Follower.SelfRequests;
+using Core.Follower.Requests;
 using Core.MonoConverter.Links;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
@@ -15,27 +15,36 @@ namespace Core.Follower.Systems
 #endif
     public class FollowerRun : IEcsRunSystem
     {
-        private readonly EcsFilterInject<
-            Inc<FollowerFollowSelfRequest, FollowerTargetLink, FollowerOffsetLink, TransformLink>
-        > m_FollowerFilter;
+        private readonly EcsWorldInject m_World;
+        private readonly EcsFilterInject<Inc<FollowerFollowRequest>> m_FollowFilter;
+        private readonly EcsPoolInject<FollowerTargetLink> m_TargetPool;
+        private readonly EcsPoolInject<FollowerOffsetLink> m_OffsetPool;
+        private readonly EcsPoolInject<TransformLink> m_TransformPool;
 
         public void Run(IEcsSystems systems)
         {
-            if (m_FollowerFilter.Value.GetEntitiesCount() <= 0)
+            if (m_FollowFilter.Value.GetEntitiesCount() <= 0)
             {
                 return;
             }
 
-            foreach (var followerEntity in m_FollowerFilter.Value)
+            foreach (var followRequestEntity in m_FollowFilter.Value)
             {
-                ref var targetLink = ref m_FollowerFilter.Pools.Inc2.Get(followerEntity);
-                ref var offsetLink = ref m_FollowerFilter.Pools.Inc3.Get(followerEntity);
-                ref var transformLink = ref m_FollowerFilter.Pools.Inc4.Get(followerEntity);
+                ref var followRequest = ref m_FollowFilter.Pools.Inc1.Get(followRequestEntity);
+                if (!followRequest.Value.Unpack(m_World.Value, out var followerEntity))
+                {
+                    m_World.Value.DelEntity(followRequestEntity);
+                    continue;
+                }
 
-                var position = targetLink.Value.position + offsetLink.Value;
-                transformLink.Value.position = position;
+                ref var target = ref m_TargetPool.Value.Get(followerEntity);
+                ref var offset = ref m_OffsetPool.Value.Get(followerEntity);
+                ref var transform = ref m_TransformPool.Value.Get(followerEntity);
 
-                m_FollowerFilter.Pools.Inc1.Del(followerEntity);
+                var position = target.Value.position + offset.Value;
+                transform.Value.position = position;
+
+                m_World.Value.DelEntity(followRequestEntity);
             }
         }
     }

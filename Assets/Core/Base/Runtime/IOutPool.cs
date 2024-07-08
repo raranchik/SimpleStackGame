@@ -1,4 +1,4 @@
-﻿namespace Core.Base.Runtime
+﻿namespace Core.Base
 {
     public interface IOutPool<T>
     {

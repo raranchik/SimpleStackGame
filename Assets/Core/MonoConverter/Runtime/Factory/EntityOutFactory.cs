@@ -1,4 +1,4 @@
-﻿using Core.Base.Runtime;
+﻿using Core.Base;
 using Leopotam.EcsLite;
 using UnityEngine;
 #if ENABLE_IL2CPP
