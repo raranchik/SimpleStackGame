@@ -21,6 +21,7 @@ namespace Core.Time
             timeService.DeltaTime = UnityEngine.Time.deltaTime;
             timeService.UnscaledTime = UnityEngine.Time.unscaledTime;
             timeService.UnscaledDeltaTime = UnityEngine.Time.unscaledDeltaTime;
+            timeService.FixedTime = UnityEngine.Time.fixedTime;
         }
     }
 }

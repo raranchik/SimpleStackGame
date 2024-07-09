@@ -14,5 +14,6 @@ namespace Core.Time
         public float DeltaTime;
         public float UnscaledTime;
         public float UnscaledDeltaTime;
+        public float FixedTime;
     }
 }

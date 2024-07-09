@@ -13,6 +13,6 @@ namespace Core.Container.Links
     [Serializable]
     public struct Grid3SizeLink
     {
-        public Vector3 Value;
+        public Vector3Int Value;
     }
 }

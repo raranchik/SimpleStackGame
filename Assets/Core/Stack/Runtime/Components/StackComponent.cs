@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Leopotam.EcsLite;
-using UnityEngine;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
 #endif
@@ -15,6 +14,6 @@ namespace Core.Stack.Components
     [Serializable]
     public struct StackComponent
     {
-        [HideInInspector] public Stack<EcsPackedEntity> Value;
+        public Stack<EcsPackedEntity> Value;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Core.Timer.Components;
+using Core.Timer.Tags;
 using Leopotam.EcsLite;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
@@ -21,17 +22,22 @@ namespace Core.Timer.Builders
             m_NewEntity = newEntity;
         }
 
-        public TimerBuilder WithInterval(float value)
+        public TimerBuilder AsInterval()
         {
-            var durationComponentPool = m_World.GetPool<DurationComponent>();
-            ref var durationComponent = ref durationComponentPool.Add(m_NewEntity);
-            durationComponent.Value = value;
-            var isIntervalTimerComponent = m_World.GetPool<IsIntervalTimerComponent>();
-            isIntervalTimerComponent.Add(m_NewEntity);
+            var pool = m_World.GetPool<IsIntervalTag>();
+            pool.Add(m_NewEntity);
             return this;
         }
 
-        public TimerBuilder WithMarker<T>() where T : struct
+        public TimerBuilder WithDuration(float value)
+        {
+            var pool = m_World.GetPool<DurationComponent>();
+            ref var duration = ref pool.Add(m_NewEntity);
+            duration.Value = value;
+            return this;
+        }
+
+        public TimerBuilder WithTag<T>() where T : struct
         {
             var pool = m_World.GetPool<T>();
             pool.Add(m_NewEntity);
@@ -40,21 +46,23 @@ namespace Core.Timer.Builders
 
         public TimerBuilder AsDisabled()
         {
-            var pool = m_World.GetPool<IsDisabledComponent>();
+            var pool = m_World.GetPool<IsDisabledTag>();
             pool.Add(m_NewEntity);
             return this;
         }
 
-        public TimerBuilder WithSource(EcsPackedEntity value)
+        public TimerBuilder WithSource(in EcsPackedEntity value)
         {
             var pool = m_World.GetPool<SourceComponent>();
-            ref var component = ref pool.Get(m_NewEntity);
+            ref var component = ref pool.Add(m_NewEntity);
             component.Value = value;
             return this;
         }
 
         public EcsPackedEntity Submit()
         {
+            var elapsed = m_World.GetPool<ElapsedComponent>();
+            elapsed.Add(m_NewEntity);
             return m_World.PackEntity(m_NewEntity);
         }
 

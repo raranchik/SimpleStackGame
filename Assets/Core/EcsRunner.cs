@@ -1,11 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core.Base;
 using Core.DevicesInput.JoystickPack.Systems;
+using Core.EcsMapper;
 using Core.Follower.Systems;
+using Core.Logger;
 using Core.MonoConverter;
+using Core.MonoConverter.Factory;
+using Core.MonoConverter.Links;
+using Core.MonoConverter.Pool;
 using Core.Movement.Move.Systems;
 using Core.Movement.Rotate.Systems;
 using Core.Player.Systems;
+using Core.RefillableStack.Systems;
+using Core.TextUpdater.Systems;
 using Core.Time;
 using Core.Timer.Services;
 using Core.Timer.Systems;
@@ -31,7 +39,7 @@ namespace Core
         [SerializeField] private MonoLinker m_PlayerLinker;
         [SerializeField] private MonoLinker m_CameraLinker;
         [SerializeField] private MonoLinker[] m_Generators;
-        [SerializeField] private MonoLinker m_ObjectPrefab;
+        [SerializeField] private MonoLinker m_StackObjectPrefab;
 
         private EcsWorld m_World;
 
@@ -43,15 +51,21 @@ namespace Core
         private IEcsSystems m_LeoEcsDebugSystems;
 #endif
 
+        private IFactory<EcsPackedEntityWithWorld> m_StackObjectFactory;
+        private IPool<EcsPackedEntityWithWorld> m_StackObjectPool;
+        private LeoEcsLiteEntityMapper m_EntityMapper;
         private TimeService m_TimeService;
         private TimerService m_TimerService;
 
         private void Awake()
         {
+            m_World = new EcsWorld();
+
             m_TimeService = new TimeService();
             m_TimerService = new TimerService(m_World);
-
-            m_World = new EcsWorld();
+            m_StackObjectFactory = new EntityFactory(m_World, m_StackObjectPrefab, OnCreateStackObject);
+            m_StackObjectPool = new EntityPool(Debug.unityLogger.WithPrefix($"StackObjectPool"), m_StackObjectFactory);
+            m_EntityMapper = new LeoEcsLiteEntityMapper(m_World, Debug.unityLogger);
 
             m_InitSystems = CreateInitSystems();
             m_InitSystems.Init();
@@ -116,19 +130,22 @@ namespace Core
                 .Add(new JoystickInit(m_JoystickLinker))
                 .Add(new PlayerAvatarInit(m_PlayerLinker))
                 .Add(new FollowerInit(m_CameraLinker))
-                // .Add(new GeneratorInit(m_Generators, m_TimerService))
-                .Inject();
+                .Add(new StackObjectGeneratorInit(m_Generators, m_TimerService))
+                .Inject(CreateInitInjectParams());
         }
 
         private IEcsSystems CreateUpdateSystems()
         {
             return new EcsSystems(m_World)
                 .Add(new TimeServiceRun())
-                .Add(new IntervalTimerRun(Debug.unityLogger))
-                // .Add(new GeneratorIntervalTimerCompleteSelfRequestHandlerRun(Debug.unityLogger))
-                // .Add(new GenerateSelfRequestHandlerRun(Debug.unityLogger,
-                //     new EntityOutPool(new EntityOutFactory(m_World, m_ObjectPrefab), 5)))
                 .Add(new JoystickRun())
+                .Add(new IntervalTimerRun(Debug.unityLogger))
+                .Add(new StackObjectDisableTimerRun(Debug.unityLogger))
+                .Add(new StackObjectActivateTimerRun(Debug.unityLogger))
+                .Add(new StackObjectTimerTickRun(Debug.unityLogger))
+                .Add(new StackObjectGeneratorRun(Debug.unityLogger, m_StackObjectPool))
+                .Add(new TranslateFromToPlayerCompleteTimerRequestRun(Debug.unityLogger))
+                .Add(new UpdateTMPRequestHandlerRun())
                 .Inject(CreateUpdateInjectParams());
         }
 
@@ -140,6 +157,8 @@ namespace Core
                 .Add(new MoveInDirectionPlayerAvatarRun())
                 .Add(new StartRotateInDirectionPlayerAvatarRun())
                 .Add(new RotateInDirectionPlayerAvatarRun())
+                .Add(new TriggerExitRefillableStackPlayerRun())
+                .Add(new TriggerStayRefillableStackPlayerRun())
                 .Add(new FollowerLeaderRun())
                 .Inject(CreateFixedUpdateInjectParams());
         }
@@ -149,6 +168,15 @@ namespace Core
             return new EcsSystems(m_World)
                 .Add(new FollowerRun())
                 .Inject();
+        }
+
+        private object[] CreateInitInjectParams()
+        {
+            return new HashSet<object>
+                {
+                    m_EntityMapper,
+                }
+                .ToArray();
         }
 
         private object[] CreateUpdateInjectParams()
@@ -165,9 +193,19 @@ namespace Core
             return new HashSet<object>
                 {
                     m_TimeService,
+                    m_EntityMapper,
+                    m_TimerService,
                 }
                 .ToArray();
         }
+
+        private void OnCreateStackObject(int entity)
+        {
+            var gameObjectPool = m_World.GetPool<GameObjectLink>();
+            ref var go = ref gameObjectPool.Get(entity);
+            go.Value.SetActive(false);
+        }
+
 #if UNITY_EDITOR
         private IEcsSystems CreateLeoEcsDebugSystems()
         {

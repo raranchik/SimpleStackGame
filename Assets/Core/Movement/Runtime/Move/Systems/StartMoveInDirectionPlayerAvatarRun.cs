@@ -2,7 +2,7 @@
 using Core.MonoConverter.Links;
 using Core.Movement.Move.Link;
 using Core.Movement.Move.Request;
-using Core.Player.Components;
+using Core.Player.Tags;
 using Core.Time;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
@@ -21,7 +21,7 @@ namespace Core.Movement.Move.Systems
     {
         private static readonly int IsMove = Animator.StringToHash("IsMove");
 
-        private readonly EcsFilterInject<Inc<RigidbodyLink, MoveSpeedLink, PlayerAvatarComponent, AnimatorLink>>
+        private readonly EcsFilterInject<Inc<RigidbodyLink, MoveSpeedLink, PlayerAvatarTag, AnimatorLink>>
             m_MoveObjectRequestFilter;
 
         private readonly EcsWorldInject m_World;

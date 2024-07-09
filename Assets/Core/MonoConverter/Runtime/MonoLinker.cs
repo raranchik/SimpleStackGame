@@ -15,10 +15,14 @@ namespace Core.MonoConverter
     {
         public override void LinkTo(in EcsPackedEntityWithWorld packedEntityWithWorld)
         {
-            var links = GetComponents<MonoLinkBase>().Where(x => x is not MonoLinker);
-            foreach (var link in links)
+            var links = GetComponentsInChildren<MonoLinkBase>(true);
+            foreach (var link in links.Where(x => x is not MonoLinker))
             {
                 link.LinkTo(packedEntityWithWorld);
+            }
+
+            foreach (var link in links.Where(x => x is not PhysicsMonoLinkBase))
+            {
                 Destroy(link);
             }
 

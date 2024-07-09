@@ -1,5 +1,4 @@
 ﻿using Core.Timer.Builders;
-using Core.Timer.Components;
 using Leopotam.EcsLite;
 #if ENABLE_IL2CPP
     using Unity.IL2CPP.CompilerServices;
@@ -22,12 +21,8 @@ namespace Core.Timer.Services
 
         public TimerBuilder DeclareTimer()
         {
-            var newEntity = m_World.NewEntity();
-            var elapsedPool = m_World.GetPool<ElapsedTimeComponent>();
-            elapsedPool.Add(newEntity);
-            var sourcePool = m_World.GetPool<SourceComponent>();
-            sourcePool.Add(newEntity);
-            var builder = new TimerBuilder(m_World, newEntity);
+            var timer = m_World.NewEntity();
+            var builder = new TimerBuilder(m_World, timer);
             return builder;
         }
     }

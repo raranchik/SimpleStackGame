@@ -2,6 +2,7 @@
 using Core.Time;
 using Core.Timer.Components;
 using Core.Timer.SelfRequests;
+using Core.Timer.Tags;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
@@ -18,14 +19,13 @@ namespace Core.Timer.Systems
     public class IntervalTimerRun : IEcsRunSystem
     {
         private readonly ILogger m_Logger;
+        private readonly EcsCustomInject<TimeService> m_Time;
+        private readonly EcsPoolInject<IsCompleteSelfRequest> m_IsCompletePool;
 
         private readonly EcsFilterInject<
-            Inc<ElapsedTimeComponent, DurationComponent, IsIntervalTimerComponent>,
-            Exc<IsDisabledComponent>
+            Inc<ElapsedComponent, DurationComponent, IsIntervalTag>,
+            Exc<IsDisabledTag>
         > m_TimerFilter;
-
-        private readonly EcsCustomInject<TimeService> m_TimeListener;
-        private readonly EcsFilterInject<Inc<CompleteSelfRequest>> m_CompleteTimerFilter;
 
         public IntervalTimerRun(ILogger logger)
         {
@@ -34,19 +34,6 @@ namespace Core.Timer.Systems
 
         public void Run(IEcsSystems systems)
         {
-            if (m_CompleteTimerFilter.Value.GetEntitiesCount() > 0)
-            {
-                m_Logger.Log(LogType.Error,
-                    $"Requests that have run 1 cycle are in system:" +
-                    $" count {m_CompleteTimerFilter.Value.GetEntitiesCount().ToString()}." +
-                    $" I deleted them for you");
-
-                foreach (var completeTimer in m_CompleteTimerFilter.Value)
-                {
-                    m_CompleteTimerFilter.Pools.Inc1.Del(completeTimer);
-                }
-            }
-
             if (m_TimerFilter.Value.GetEntitiesCount() <= 0)
             {
                 return;
@@ -55,7 +42,7 @@ namespace Core.Timer.Systems
             foreach (var timer in m_TimerFilter.Value)
             {
                 ref var elapsed = ref m_TimerFilter.Pools.Inc1.Get(timer);
-                elapsed.Value += m_TimeListener.Value.DeltaTime;
+                elapsed.Value += m_Time.Value.DeltaTime;
 
                 ref var duration = ref m_TimerFilter.Pools.Inc2.Get(timer);
                 if (elapsed.Value < duration.Value)
@@ -64,7 +51,7 @@ namespace Core.Timer.Systems
                 }
 
                 elapsed.Value = 0f;
-                m_CompleteTimerFilter.Pools.Inc1.Add(timer);
+                m_IsCompletePool.Value.Add(timer);
             }
         }
     }

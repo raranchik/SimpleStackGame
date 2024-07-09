@@ -1,7 +1,7 @@
 ﻿using Core.DevicesInput.Requests;
 using Core.MonoConverter.Links;
 using Core.Movement.Rotate.Links;
-using Core.Player.Components;
+using Core.Player.Tags;
 using Core.Time;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
@@ -22,7 +22,7 @@ namespace Core.Movement.Rotate.Systems
         private readonly EcsFilterInject<Inc<IsStartRotateInDirection>> m_RotateInDirFilter;
         private readonly EcsCustomInject<TimeService> m_TimeService;
 
-        private readonly EcsFilterInject<Inc<RigidbodyLink, RotateSpeedLink, PlayerAvatarComponent>>
+        private readonly EcsFilterInject<Inc<RigidbodyLink, RotateSpeedLink, PlayerAvatarTag>>
             m_RotateObjectFilter;
 
         public void Run(IEcsSystems systems)
