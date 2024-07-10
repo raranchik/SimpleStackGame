@@ -5,7 +5,7 @@ using Core.EcsMapper;
 using Core.MonoConverter;
 using Core.MonoConverter.Links;
 using Core.Player.Tags;
-using Core.Stack.Components;
+using Core.Stack.Base.Components;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using UnityEngine;
@@ -21,7 +21,7 @@ namespace Core.Player.Systems
 #endif
     public class PlayerAvatarInit : IEcsInitSystem
     {
-        private readonly EcsCustomInject<LeoEcsLiteEntityMapper> m_EntityMapper;
+        private readonly EcsCustomInject<LeoEcsLiteEntityMap> m_EntityMapper;
         private readonly MonoLinkBase m_AvatarLinker;
         private readonly EcsWorldInject m_World;
         private readonly EcsPoolInject<GridEmptyPositionsComponent> m_EmptyPositionsPool;
@@ -53,15 +53,15 @@ namespace Core.Player.Systems
         private void InitializeContainer(in int entity)
         {
             ref var emptyPositions = ref m_EmptyPositionsPool.Value.Add(entity);
-            emptyPositions.Value = new Queue<Vector3Int>();
+            emptyPositions.Value = new Stack<Vector3Int>();
             ref var grid3Size = ref m_Grid3SizePool.Value.Get(entity);
-            for (var x = 0; x < grid3Size.Value.x; x++)
+            for (var x = grid3Size.Value.x - 1; x >= 0; x--)
             {
-                for (var y = 0; y < grid3Size.Value.y; y++)
+                for (var y = grid3Size.Value.y - 1; y >= 0; y--)
                 {
-                    for (var z = 0; z < grid3Size.Value.z; z++)
+                    for (var z = grid3Size.Value.z - 1; z >= 0; z--)
                     {
-                        emptyPositions.Value.Enqueue(new Vector3Int(x, y, z));
+                        emptyPositions.Value.Push(new Vector3Int(x, y, z));
                     }
                 }
             }

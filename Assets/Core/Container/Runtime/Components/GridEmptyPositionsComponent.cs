@@ -14,6 +14,6 @@ namespace Core.Container.Components
     [Serializable]
     public struct GridEmptyPositionsComponent
     {
-        public Queue<Vector3Int> Value;
+        public Stack<Vector3Int> Value;
     }
 }

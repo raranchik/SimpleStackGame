@@ -12,7 +12,11 @@ using Core.MonoConverter.Pool;
 using Core.Movement.Move.Systems;
 using Core.Movement.Rotate.Systems;
 using Core.Player.Systems;
-using Core.RefillableStack.Systems;
+using Core.Stack.Base.Services;
+using Core.Stack.Refillable.Services;
+using Core.Stack.Refillable.Systems;
+using Core.Stack.Void.Services;
+using Core.Stack.Void.Systems;
 using Core.TextUpdater.Systems;
 using Core.Time;
 using Core.Timer.Services;
@@ -35,11 +39,13 @@ namespace Core
 #endif
     public class EcsRunner : MonoBehaviour
     {
+        [SerializeField] private MonoLinker m_VoidLinker;
         [SerializeField] private MonoLinker m_JoystickLinker;
         [SerializeField] private MonoLinker m_PlayerLinker;
         [SerializeField] private MonoLinker m_CameraLinker;
         [SerializeField] private MonoLinker[] m_Generators;
         [SerializeField] private MonoLinker m_StackObjectPrefab;
+        [SerializeField] private List<StackObject> m_StackObjects;
 
         private EcsWorld m_World;
 
@@ -53,9 +59,12 @@ namespace Core
 
         private IFactory<EcsPackedEntityWithWorld> m_StackObjectFactory;
         private IPool<EcsPackedEntityWithWorld> m_StackObjectPool;
-        private LeoEcsLiteEntityMapper m_EntityMapper;
+        private LeoEcsLiteEntityMap m_EntityMap;
         private TimeService m_TimeService;
         private TimerService m_TimerService;
+        private StackObjectsMeshMap m_MeshMap;
+        private RefillableService m_RefillableService;
+        private VoidService m_VoidService;
 
         private void Awake()
         {
@@ -65,7 +74,12 @@ namespace Core
             m_TimerService = new TimerService(m_World);
             m_StackObjectFactory = new EntityFactory(m_World, m_StackObjectPrefab, OnCreateStackObject);
             m_StackObjectPool = new EntityPool(Debug.unityLogger.WithPrefix($"StackObjectPool"), m_StackObjectFactory);
-            m_EntityMapper = new LeoEcsLiteEntityMapper(m_World, Debug.unityLogger);
+            m_EntityMap = new LeoEcsLiteEntityMap(m_World, Debug.unityLogger);
+            m_MeshMap = new StackObjectsMeshMap(m_StackObjects);
+            m_RefillableService = new RefillableService(m_World, m_TimerService, m_StackObjectPool, m_MeshMap);
+            m_VoidService = new VoidService(m_World, m_TimerService, m_StackObjectPool);
+
+            m_VoidLinker.LinkTo(m_World.PackEntityWithWorld(m_World.NewEntity()));
 
             m_InitSystems = CreateInitSystems();
             m_InitSystems.Init();
@@ -130,7 +144,7 @@ namespace Core
                 .Add(new JoystickInit(m_JoystickLinker))
                 .Add(new PlayerAvatarInit(m_PlayerLinker))
                 .Add(new FollowerInit(m_CameraLinker))
-                .Add(new StackObjectGeneratorInit(m_Generators, m_TimerService))
+                .Add(new GeneratorInit(m_Generators, m_TimerService))
                 .Inject(CreateInitInjectParams());
         }
 
@@ -139,13 +153,18 @@ namespace Core
             return new EcsSystems(m_World)
                 .Add(new TimeServiceRun())
                 .Add(new JoystickRun())
-                .Add(new IntervalTimerRun(Debug.unityLogger))
-                .Add(new StackObjectDisableTimerRun(Debug.unityLogger))
-                .Add(new StackObjectActivateTimerRun(Debug.unityLogger))
-                .Add(new StackObjectTimerTickRun(Debug.unityLogger))
-                .Add(new StackObjectGeneratorRun(Debug.unityLogger, m_StackObjectPool))
-                .Add(new TranslateFromToPlayerCompleteTimerRequestRun(Debug.unityLogger))
-                .Add(new UpdateTMPRequestHandlerRun())
+                .Add(new KillRun())
+                .Add(new OnPauseGenerateTimerRun())
+                .Add(new PauseRun())
+                .Add(new OnUnpauseGenerateTimerRun())
+                .Add(new UnpauseRun())
+                .Add(new IntervalTimerCompleteRun())
+                .Add(new TickRun())
+                .Add(new GenerateTimerTickRun())
+                .Add(new GenerateTimerCompleteRun())
+                .Add(new TranslateCompleteTimerRun())
+                .Add(new CompleteTranslateTimerRun())
+                .Add(new UpdateTMPRun())
                 .Inject(CreateUpdateInjectParams());
         }
 
@@ -157,8 +176,10 @@ namespace Core
                 .Add(new MoveInDirectionPlayerAvatarRun())
                 .Add(new StartRotateInDirectionPlayerAvatarRun())
                 .Add(new RotateInDirectionPlayerAvatarRun())
-                .Add(new TriggerExitRefillableStackPlayerRun())
-                .Add(new TriggerStayRefillableStackPlayerRun())
+                .Add(new TriggerExitRefillableRun())
+                .Add(new TriggerStayRefillableRun())
+                .Add(new TriggerExitVoidRun())
+                .Add(new TriggerStayVoidRun())
                 .Add(new FollowerLeaderRun())
                 .Inject(CreateFixedUpdateInjectParams());
         }
@@ -174,7 +195,8 @@ namespace Core
         {
             return new HashSet<object>
                 {
-                    m_EntityMapper,
+                    m_EntityMap,
+                    m_MeshMap,
                 }
                 .ToArray();
         }
@@ -184,6 +206,9 @@ namespace Core
             return new HashSet<object>
                 {
                     m_TimeService,
+                    m_MeshMap,
+                    m_RefillableService,
+                    m_VoidService,
                 }
                 .ToArray();
         }
@@ -193,8 +218,10 @@ namespace Core
             return new HashSet<object>
                 {
                     m_TimeService,
-                    m_EntityMapper,
+                    m_EntityMap,
                     m_TimerService,
+                    m_RefillableService,
+                    m_VoidService,
                 }
                 .ToArray();
         }
