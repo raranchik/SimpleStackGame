@@ -4,6 +4,7 @@ using Core.Base;
 using Core.DevicesInput.JoystickPack.Systems;
 using Core.EcsMapper;
 using Core.Follower.Systems;
+using Core.Fps;
 using Core.Logger;
 using Core.MonoConverter;
 using Core.MonoConverter.Factory;
@@ -39,6 +40,7 @@ namespace Core
 #endif
     public class EcsRunner : MonoBehaviour
     {
+        [SerializeField] private FpsCounter m_FpsCounter;
         [SerializeField] private MonoLinker m_VoidLinker;
         [SerializeField] private MonoLinker m_JoystickLinker;
         [SerializeField] private MonoLinker m_PlayerLinker;
@@ -165,6 +167,7 @@ namespace Core
                 .Add(new TranslateCompleteTimerRun())
                 .Add(new CompleteTranslateTimerRun())
                 .Add(new UpdateTMPRun())
+                .Add(new FpsCounterRun())
                 .Inject(CreateUpdateInjectParams());
         }
 
@@ -209,6 +212,7 @@ namespace Core
                     m_MeshMap,
                     m_RefillableService,
                     m_VoidService,
+                    m_FpsCounter,
                 }
                 .ToArray();
         }

@@ -228,11 +228,8 @@ namespace Core.Stack.Refillable.Services
             transform.Value.localScale = Vector3.one * scale;
 
             ref var fromEmptyPositions = ref m_EmptyPositions.Get(fromEntity);
-            ref var toEmptyPositions = ref m_EmptyPositions.Get(toEntity);
-            var gridPosition = toEmptyPositions.Value.Pop();
             ref var gridObjectPosition = ref m_GridPosition.Get(objectEntity);
             fromEmptyPositions.Value.Push(gridObjectPosition.Value);
-            gridObjectPosition.Value = gridPosition;
 
             ref var containerRoot = ref m_ContainerRoot.Get(toEntity);
             transform.Value.SetParent(containerRoot.Value);

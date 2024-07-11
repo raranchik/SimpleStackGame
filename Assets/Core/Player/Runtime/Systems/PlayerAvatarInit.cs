@@ -54,17 +54,6 @@ namespace Core.Player.Systems
         {
             ref var emptyPositions = ref m_EmptyPositionsPool.Value.Add(entity);
             emptyPositions.Value = new Stack<Vector3Int>();
-            ref var grid3Size = ref m_Grid3SizePool.Value.Get(entity);
-            for (var x = grid3Size.Value.x - 1; x >= 0; x--)
-            {
-                for (var y = grid3Size.Value.y - 1; y >= 0; y--)
-                {
-                    for (var z = grid3Size.Value.z - 1; z >= 0; z--)
-                    {
-                        emptyPositions.Value.Push(new Vector3Int(x, y, z));
-                    }
-                }
-            }
         }
 
         private void InitializeStack(in int entity)
